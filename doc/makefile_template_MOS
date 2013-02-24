@@ -1,0 +1,56 @@
+#
+#  <project_name>
+#
+#   (C) TDolphin <copyrights_years>
+#
+#  makefile (MorphOS)
+#
+#    created: <date>
+#       last: <date>
+#
+
+CC = gcc
+CFLAGS = -noixemul -O2 -I/td_dev/inc
+#CFLAGS_SDL = `sdl-config --cflags` $(CFLAGS)
+LFLAGS = `sdl-config --libs` -L/td_dev/lib
+LFLAGS += <other_libs>
+LFLAGS += -lSDL -lSDL_ttf -lSDL_image -lSDL_mixer <other_SDL_libs>
+EXE = <executable_name>
+PROJ_NAME = <project_name>
+
+OBJS = obj/<obj_file> <object_files>
+
+all : $(OBJS)
+	@echo "## Linking ..."
+	$(CC) $(CFLAGS) `sdl-config --cflags` $(OBJS) -o $(EXE) $(LFLAGS)
+	@echo "## Stripping ..."
+	ppc-morphos-strip --remove-section=.comment $(EXE) -o $(EXE)_strip
+	@echo "## Finished :)"
+
+dump : $(EXE)
+	ppc-morphos-objdump --reloc --disassemble-all $(EXE) > $(EXE)_disassembled
+
+#obj/td%_sdl%.o:   src/td%_sdl%.cpp
+#   $(CC) $(CFLAGS_SDL) -c $< -o $@
+
+#obj/td%_sdl%.o: src/td%_sdl%.c
+#   $(CC) $(CFLAGS_SDL) -c $< -o $@
+
+obj/%.o: src/%.cpp src/%.h
+   $(CC) $(CFLAGS) -c $< -o $@
+
+obj/%.o: src/%.c src/%.h
+   $(CC) $(CFLAGS) -c $< -o $@
+
+clean :
+   delete obj/#?.o
+
+# create lha file (to ram disk)
+dist:
+	mkdir "ram:$(PROJ_NAME)"
+    copy gfx/ "ram:$(PROJ_NAME)"
+    copy sfx/ "ram:$(PROJ_NAME)"
+    copy mfx/ "ram:$(PROJ_NAME)"
+    copy fonts/ "ram:$(PROJ_NAME)"
+    copy $(EXE)_strip "ram:$(PROJ_NAME)/$(EXE)"
+    lha -r a "$(PROJ_NAME).lha" "ram:$(PROJ_NAME)"

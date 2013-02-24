@@ -1,0 +1,59 @@
+#
+#  <project_name>
+#
+#   (C) TDolphin <copyrights_years>
+#
+#  makefile (Linux)
+#
+#    created: <date>
+#       last: <date>
+#
+
+CC = gcc
+CFLAGS = -O2 -I${TD_DEV}/inc -DLINUX
+#CFLAGS_SDL = `sdl-config --cflags` $(CFLAGS)
+LFLAGS = `sdl-config --libs` -L/td_dev/lib
+LFLAGS += <other_libs>
+LFLAGS += -lSDL -lSDL_ttf -lSDL_image -lSDL_mixer <other_SDL_libs>
+EXE = <executable_name>
+PROJ_NAME = <project_name>
+TGZ_PATH = /tmp/tdolphin/$(PROJ_NAME)
+
+OBJS = obj/<obj_file> <object_files>
+
+all : $(OBJS)
+	@echo "## Linking ..."
+	$(CC) $(CFLAGS) `sdl-config --cflags` $(OBJS) -o $(EXE) $(LFLAGS)
+	@echo "## Stripping ..."
+	strip --remove-section=.comment $(EXE) -o $(EXE)_strip
+	@echo "## Finished :)"
+
+dump : $(EXE)
+	objdump --reloc --disassemble-all $(EXE) > $(EXE)_disassembled
+
+#obj/td%_sdl%.o:   src/td%_sdl%.cpp
+#   $(CC) $(CFLAGS_SDL) -c $< -o $@
+
+#obj/td%_sdl%.o: src/td%_sdl%.c
+#   $(CC) $(CFLAGS_SDL) -c $< -o $@
+
+obj/%.o: src/%.cpp src/%.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+obj/%.o: src/%.c src/%.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+clean :
+	rm -f obj/*.o
+
+# create tgz file (to /tmp)
+dist:
+	rm -f $(TGZ_PATH)
+	mkdir $(TGZ_PATH)
+	cp gfx/ $(TGZ_PATH)
+	cp sfx/ $(TGZ_PATH)
+	cp mfx/ $(TGZ_PATH)
+	cp fonts/ $(TGZ_PATH)
+	cp $(EXE)_strip $(TGZ_PATH)/$(EXE)
+	tar cvfz $(PROJ_NAME).tar.gz $(TGZ_PATH)
+

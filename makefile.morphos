@@ -1,0 +1,178 @@
+#
+# 	TD Dev - TDolphin's development environment
+#
+#   (C) TDolphin 2007-2008
+#
+# 	makefile (MorphOS)
+#
+#    created: 6.08.2007
+#       last: 12.01.2008
+#
+
+CC = gcc
+AR = ar
+LD = ld
+CFLAGS = -noixemul -O2 -Iinc
+CPPFLAGS = $(CFLAGS)
+#  -D__cplusplus   <-- nie dziala ta opcja ?????
+CFLAGS_SDL = `sdl-config --cflags` $(CFLAGS)
+CPPFLAGS_SDL = $(CFLAGS_SDL)
+AFLAGS = rcs
+LFLAGS = -r -o
+LFLAGS_SDL = `sdl-config --libs` -r -o 
+#LFLAGS = `sdl-config --libs` -lstdc++ -lSDL_ttf -lSDL_gfx -lSDL_image -lSDL_mixer
+EXE_UT = UnitTests
+
+#
+#  Object(s) for static libraries
+#
+
+OBJS_GAME = obj/td_game_objects.o
+OBJS_SDL = obj/td_sdl_util.o obj/td_sdl_soundmixer.o obj/td_sdl_resource.o
+#OBJS_SDL += /gg/lib/libSDL.a /gg/lib/libSDL_mixer.a /gg/lib/libSDL_gfx.a /gg/lib/libSDL_image.a /gg/lib/libSDL_ttf.a
+OBJS_UTIL = obj/td_templates.o obj/td_txtconv.o obj/td_math_util.o
+
+OBJS_ANSIC_SDL = obj/td_ansic_sdl_soundmixer.o
+OBJS_ANSIC_AMIGA_UTIL = obj/td_ansic_arexx_util.o
+#OBJS_ANSIC_SDL += /gg/lib/libSDL.a /gg/lib/libSDL_mixer.a
+
+OBJS_AFC = obj/afcstring.o
+
+OBJS_UNIT_TEST = obj-ut/UnitTests.o obj-ut/UnitTests-STL.o obj-ut/UnitTests-MathUtil.o obj-ut/UnitTests-GameObjects.o
+
+#
+#  All objects
+#
+
+OBJS = $(OBJS_GAME) $(OBJS_SDL) $(OBJS_UTIL) $(OBJS_ANSIC_SDL) $(OBJS_ANSIC_AMIGA_UTIL) $(OBJS_AFC) $(OBJS_UNIT_TEST)
+
+#
+#  Static Libraries
+#
+
+LIB_GAME = lib/libTDgame.a
+LIB_SDL = lib/libTDsdl.a
+LIB_UTIL = lib/libTDutil.a
+
+LIB_ANSIC_SDL = lib/libTDansiCsdl.a
+LIB_ANSIC_AMIGA_UTIL = lib/libTDansiCautil.a
+
+LIB_AFC = lib/libAFC.a
+
+#
+#
+#
+
+LIBS = $(LIB_GAME) $(LIB_SDL) $(LIB_UTIL) $(LIB_ANSIC_SDL) $(LIB_ANSIC_AMIGA_UTIL) $(LIB_AFC)
+
+#
+#  HELP
+#
+
+help :
+	@echo
+	@echo "============================================="
+	@echo " TD Dev - TDolphin's development environment "
+	@echo " (C) TDolphin 2007     www.tdolphin.org      "
+	@echo "  !!! Only for INTERNAL DEVELOPMENT USE !!!  "
+	@echo "============================================="
+	@echo
+	@echo "makefile help:"
+	@echo "   make clean - clean all objs and libs"
+	@echo "   make clean-obj - clean objs"
+	@echo "   make clean-lib - clean libs"
+	@echo "   make clean-ut - clean unit tests"
+	@echo "   make all - build all libs and unit tests"
+	@echo "   make lib - build all libs"
+	@echo "   make ut - make unit tests"
+	@echo "   make rebuild - clean and make"
+	@echo
+
+#
+#  Rebuild all
+#
+
+rebuild : clean lib ut
+	@echo "## rebuild finished !!!"
+
+#
+#  Creating all
+#
+
+all : lib ut
+	@echo "## all finished :)"
+
+#
+#  Creating static libs
+#
+
+lib : $(OBJS) $(LIBS)
+#	@echo "## creating 'TD' static libs ..."
+	@echo "## finished 'TD' static libs ..."
+
+$(LIB_GAME) : $(OBJS_GAME)
+	$(AR) $(AFLAGS) $(LIB_GAME) $(OBJS_GAME)
+
+$(LIB_SDL) : $(OBJS_SDL)
+	$(AR) $(AFLAGS) $(LIB_SDL) $(OBJS_SDL)
+
+$(LIB_UTIL) : $(OBJS_UTIL)
+	$(AR) $(AFLAGS) $(LIB_UTIL) $(OBJS_UTIL)
+
+$(LIB_ANSIC_SDL) : $(OBJS_ANSIC_SDL)
+	$(AR) $(AFLAGS) $(LIB_ANSIC_SDL) $(OBJS_ANSIC_SDL)
+
+$(LIB_ANSIC_AMIGA_UTIL) : $(OBJS_ANSIC_AMIGA_UTIL)
+	$(AR) $(AFLAGS) $(LIB_ANSIC_AMIGA_UTIL) $(OBJS_ANSIC_AMIGA_UTIL)
+
+$(LIB_AFC) : $(OBJS_AFC)
+	$(AR) $(AFLAGS) $(LIB_AFC) $(OBJS_AFC)
+
+
+#
+#  Unit tests
+#
+
+ut : $(OBJS_UNIT_TEST)
+	@echo "## creating UnitTests ..."
+	$(CC) $(OBJS_UNIT_TEST) -Llib -lTDutil -lTDgame -lstdc++ -o $(EXE_UT)
+	@echo "## finished UnitTest" 
+
+#
+#  Compiling rules for sdl, ansic, c++ files
+#
+
+obj/td_sdl%.o:	  src/td_sdl%.cpp
+	$(CC) $(CPPFLAGS_SDL) -c $< -o $@
+
+obj/td_ansic_sdl%.o:	src/td_ansic_sdl%.c
+	$(CC) $(CFLAGS_SDL) -c $< -o $@
+
+obj/%.o:	src/%.cpp
+	$(CC) $(CPPFLAGS) -c $< -o $@
+
+obj/%.o:	src/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+obj-ut/%.o:	%.cpp
+	$(CC) $(CPPFLAGS_SDL) -c $< -o $@
+	
+#
+#  Cleaning/deleting objects and libraries
+#
+
+clean : clean-start clean-obj clean-lib clean-ut
+	@echo "## cleaning finished"
+
+clean-start:
+	@echo "## cleaning started ..."
+
+clean-obj :
+	delete obj/#?.o
+
+clean-lib :
+	delete lib/#?.a
+	
+clean-ut :
+	delete obj-ut/#?.o
+	delete $(EXE_UT)

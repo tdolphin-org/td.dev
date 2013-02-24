@@ -1,0 +1,116 @@
+===============================================================================
+ How Prepare and Configure TD Development Environment
+===============================================================================
+
+ (c) TDolphin 2007
+
+created: 6.01.2007
+last: 8.11.2007
+
+
+========================================
+ installation
+========================================
+
+--------------------
+ MorphOS
+--------------------
+
+** requirements:
+- installed GG for MorphOS [ http://developer.morphosppc.com/ : have to be registered ]
+- installed PowerSDL (MorphOS version) [ http://www.lehtoranta.net/powersdl/powersdl.lha ]
+- installed SDK for PowerSDL (MorphOS version) [ http://www.lehtoranta.net/powersdl/powersdl_sdk.lha ]
+
+** installation/configuration steps:
+- download td_dev_mos.lha
+- create drawer (let's call it <TD_DEV_PATH>) where you will keep development files/folders
+- unpack/copy all files/drawers to <TD_DEV_PATH>
+- add to s:user-startup following lines
+
+;BEGIN td_dev
+assign td_dev: <TD_DEV_PATH>
+;END td_dev
+
+for example:
+
+;BEGIN td_dev
+assign td_dev: work:programming/_tdolphin_projects/td_dev/
+;END td_dev
+
+- td_dev is accesible at volume td_dev:
+
+--------------------
+ Windows
+--------------------
+
+subst p: ...
+
+--------------------
+ Linux Debian PowerPC
+--------------------
+
+--------------------
+ Linux Debian x86
+--------------------
+
+** requirements:
+- installed GCC an headers
+- installed xserver
+- installed SDL
+  (apt-get install libsdl1.2-all)
+- installed headers/libs files for SDL
+  (apt-get install libsdl1.2-dev libsdl-gfx1.2-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev libsdl-image1.2-dev)
+- installed OpenGL (glut)
+  (apt-get install libglut3)
+- installed headers/libs for OpenGL (glut)
+  (apt-get install libglut3-dev)
+
+** installation/configuration steps:
+- create folder \opt\td_dev\
+- unpack/copy all files/folder to it
+- add to .bashrc following lines
+
+export TD_DEV /opt/td_dev
+
+
+--------------------
+ FreeBSD x86
+--------------------
+
+
+========================================
+ td_dev disk structure
+========================================
+
+ \td_dev\  -+-> inc\
+            |
+            +-> src\
+            |
+            +-> obj\
+            |
+            +-> lib\
+            |
+            |> makefile
+            |
+            |> makefile.mos
+
+
+========================================
+ td project makefiles
+========================================
+
+In makefile of TD project you have to add flag to GCC compilation:
+
+-I/td_dev/include
+
+for example:
+
+CFLAGS = -noixemul -I/td_dev/inc
+
+Also to linking you have to add flag:
+
+-L/td_dev/lib
+
+for example
+
+LFLAGS = `sdl-config --libs` -lstdc++ -lSDL_ttf -lSDL_gfx -lSDL_image -lSDL_mixer -L/td_dev/lib -lTDgame -lTDutil -lTDsdl
